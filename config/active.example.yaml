@@ -1,0 +1,49 @@
+# Agent Factory Configuration
+# 复制此文件为 active.yaml 并填入你的配置：
+#   cp config/active.example.yaml config/active.yaml
+
+llm:
+  # 可选: deepseek / qwen / zhipu / moonshot / claude / openai / ollama / custom
+  provider: deepseek
+  base_url: https://api.deepseek.com/v1
+  api_key: "your-api-key-here"       # 替换为你的 API key
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 4096
+
+embedding:
+  # local 模式使用本地模型，无需 API key（推荐）
+  provider: local
+  model: BAAI/bge-small-zh-v1.5
+  # 首次运行会自动从 HuggingFace 下载模型（约 400MB）
+  # 国内用户建议: export HF_ENDPOINT=https://hf-mirror.com
+
+# 可选配置（以下使用默认值，一般无需修改）：
+#
+# vector_db:
+#   type: milvus_lite
+#   path: ./data/vectordb
+#   collection: agent_docs
+#
+# chunking:
+#   strategy: semantic              # semantic / sliding_window / heading
+#   max_chunk_size: 1024
+#   overlap: 128
+#   respect_structure: true
+#
+# retrieval:
+#   strategy: hybrid
+#   top_k: 5
+#   vector_weight: 0.7
+#   bm25_weight: 0.3
+#   rerank: true
+#   rerank_top_k: 5
+#
+# benchmark:
+#   test_questions_per_doc: 5
+#   metrics:
+#     - recall
+#     - precision
+#     - mrr
+#     - faithfulness
+#     - relevance
