@@ -10,10 +10,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from src.kb_manager import KBManager
-from src.chat_engine import ChatEngine
-from src.core.llm.client import LLMClient
-from src.core.llm.local_embedder import LocalEmbedder
+from kb_studio.kb_manager import KBManager
+from kb_studio.chat_engine import ChatEngine
+from kb_studio.core.llm.client import LLMClient
+from kb_studio.core.llm.local_embedder import LocalEmbedder
 
 app = FastAPI(title="KB-Studio", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -55,7 +55,7 @@ def _get_emb():
         if cfg.get("provider") == "local" or not cfg.get("api_key"):
             _emb_client = LocalEmbedder(cfg.get("model", "BAAI/bge-small-zh-v1.5"))
         else:
-            from src.core.llm.client import EmbeddingClient
+            from kb_studio.core.llm.client import EmbeddingClient
             _emb_client = EmbeddingClient(cfg)
     return _emb_client
 
@@ -100,7 +100,7 @@ async def health():
 
 @app.get("/providers")
 async def list_providers():
-    from src.core.llm.providers import list_providers as lp
+    from kb_studio.core.llm.providers import list_providers as lp
     return lp()
 
 

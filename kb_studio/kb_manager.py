@@ -8,8 +8,8 @@ from pathlib import Path
 
 import yaml
 
-from src.core.doc_processor.converter import DocumentConverter
-from src.core.doc_processor.chunker import get_chunker, Chunk
+from kb_studio.core.doc_processor.converter import DocumentConverter
+from kb_studio.core.doc_processor.chunker import get_chunker, Chunk
 
 
 @dataclass

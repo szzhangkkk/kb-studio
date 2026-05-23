@@ -10,7 +10,7 @@ import jieba
 import numpy as np
 from rank_bm25 import BM25Okapi
 
-from src.core.vector_store.milvus_store import MilvusStore, SearchResult
+from kb_studio.core.vector_store.milvus_store import MilvusStore, SearchResult
 
 
 @dataclass

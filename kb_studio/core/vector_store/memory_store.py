@@ -8,8 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
-from src.core.doc_processor.chunker import Chunk
-from src.core.vector_store.milvus_store import SearchResult
+from kb_studio.core.doc_processor.chunker import Chunk
+from kb_studio.core.vector_store.milvus_store import SearchResult
 
 
 class MemoryVectorStore:

@@ -16,14 +16,14 @@ def main():
 def serve(port):
     """Start the KB-Studio server."""
     import uvicorn
-    uvicorn.run("src.server:app", host="0.0.0.0", port=port)
+    uvicorn.run("kb_studio.server:app", host="0.0.0.0", port=port)
 
 
 @main.command()
 @click.option("--config", default="", help="Config file path")
 def test_connection(config):
     """Test LLM and Embedding connection."""
-    from src.core.llm.client import LLMClient
+    from kb_studio.core.llm.client import LLMClient
     cfg = _load_config(config)
     llm = LLMClient(cfg.get("llm", {}))
     click.echo("Testing LLM...")
@@ -39,7 +39,7 @@ def test_connection(config):
 @click.option("--description", default="", help="Knowledge base description")
 def create_kb(name, description):
     """Create a new knowledge base."""
-    from src.kb_manager import KBManager
+    from kb_studio.kb_manager import KBManager
     mgr = KBManager()
     kb = mgr.create(name, description)
     click.echo(f"Created knowledge base: {kb.name}")
@@ -48,7 +48,7 @@ def create_kb(name, description):
 @main.command()
 def list_kb():
     """List all knowledge bases."""
-    from src.kb_manager import KBManager
+    from kb_studio.kb_manager import KBManager
     mgr = KBManager()
     kbs = mgr.list()
     if not kbs:

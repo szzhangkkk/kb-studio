@@ -8,7 +8,7 @@ from typing import Any
 
 from openai import OpenAI
 
-from src.core.llm.providers import PROVIDER_TEMPLATES, get_provider_template
+from kb_studio.core.llm.providers import PROVIDER_TEMPLATES, get_provider_template
 
 
 @dataclass

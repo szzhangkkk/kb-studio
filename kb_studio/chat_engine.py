@@ -5,10 +5,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.core.llm.client import LLMClient
-from src.core.llm.local_embedder import LocalEmbedder
-from src.core.retrieval.hybrid_search import HybridRetriever
-from src.core.vector_store.memory_store import MemoryVectorStore
+from kb_studio.core.llm.client import LLMClient
+from kb_studio.core.llm.local_embedder import LocalEmbedder
+from kb_studio.core.retrieval.hybrid_search import HybridRetriever
+from kb_studio.core.vector_store.memory_store import MemoryVectorStore
 
 
 class ChatEngine:
