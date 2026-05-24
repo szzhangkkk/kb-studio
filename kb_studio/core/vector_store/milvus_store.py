@@ -2,28 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from pymilvus import (
-    Collection,
-    CollectionSchema,
-    DataType,
-    FieldSchema,
-    connections,
-    utility,
-)
-
 from kb_studio.core.doc_processor.chunker import Chunk
-
-
-@dataclass
-class SearchResult:
-    chunk_id: str
-    content: str
-    score: float
-    source: str
-    heading_path: list[str]
-    metadata: dict
+from kb_studio.core.vector_store import SearchResult
 
 
 class MilvusStore:
@@ -47,7 +27,7 @@ class MilvusStore:
         self._host = host
         self._port = port
         self._uri = uri
-        self._collection: Collection | None = None
+        self._collection = None
 
     def connect(self):
         if self._connected:
@@ -58,6 +38,7 @@ class MilvusStore:
             from pymilvus import MilvusClient
             self._lite_client = MilvusClient(uri=self._lite_path)
         else:
+            from pymilvus import connections
             connections.connect(host=self._host, port=self._port)
         self._connected = True
 
@@ -81,6 +62,7 @@ class MilvusStore:
                 schema=schema,
             )
         else:
+            from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, utility
             if utility.has_collection(self.collection_name):
                 self._collection = Collection(self.collection_name)
                 return
