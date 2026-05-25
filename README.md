@@ -7,6 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-≥3.10-blue" alt="Python">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/UI-Modern%20Web-purple" alt="UI">
 </p>
 
 ---
@@ -20,6 +21,16 @@ KB-Studio 是一个简洁的知识库问答平台。上传文档 → 手动配�
 ```
 创建知识库 → 上传文档 → 配置 Prompt → 对话测试 → 导出部署
 ```
+
+## ✨ 特性
+
+- 🎨 **现代化 Web UI** - 清爽的白色主题，流畅的动画效果
+- 📚 **多知识库管理** - 支持创建多个独立知识库
+- 📄 **多格式文档** - 支持 PDF、Word、TXT、HTML 等格式
+- 🤖 **多 LLM 提供商** - 支持 DeepSeek、通义千问、Claude、OpenAI 等
+- 🔍 **混合检索** - 向量搜索 + BM25 关键词检索
+- 💬 **实时对话** - 支持对话历史和上下文理解
+- 📊 **参考来源** - 显示 RAG 检索的文档片段和来源
 
 ## 快速开始
 
@@ -66,6 +77,10 @@ kb-studio serve
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
+| `GET` | `/health` | 健康检查 |
+| `GET` | `/providers` | 列出 LLM 提供商 |
+| `POST` | `/config` | 更新配置 |
+| `POST` | `/test-connection` | 测试连接 |
 | `GET` | `/kb/list` | 列出知识库 |
 | `POST` | `/kb/create` | 创建知识库 |
 | `DELETE` | `/kb/{name}` | 删除知识库 |
@@ -85,6 +100,44 @@ llm:
 embedding:
   provider: local
   model: BAAI/bge-small-zh-v1.5
+```
+
+### 支持的 LLM 提供商
+
+- **DeepSeek** - deepseek-chat, deepseek-reasoner
+- **通义千问** - qwen-max, qwen-plus, qwen-turbo
+- **智谱 GLM** - glm-4-plus, glm-4-flash
+- **Moonshot** - moonshot-v1-128k, moonshot-v1-32k
+- **Anthropic Claude** - claude-sonnet-4-6, claude-haiku-4-5
+- **OpenAI** - gpt-4o, gpt-4o-mini
+- **Ollama** - 本地模型
+
+## 技术栈
+
+- **后端**: Python, FastAPI, Uvicorn
+- **文档处理**: markitdown
+- **向量检索**: sentence-transformers, Milvus (可选)
+- **关键词检索**: jieba, rank-bm25
+- **前端**: 原生 HTML/CSS/JS
+
+## 项目结构
+
+```
+kb-studio/
+├── kb_studio/
+│   ├── cli.py              # CLI 命令
+│   ├── server.py           # FastAPI 服务器
+│   ├── kb_manager.py       # 知识库管理
+│   ├── chat_engine.py      # RAG 对话引擎
+│   └── core/
+│       ├── llm/            # LLM 客户端
+│       ├── retrieval/      # 检索策略
+│       ├── vector_store/   # 向量存储
+│       └── doc_processor/  # 文档处理
+├── web/frontend/dist/      # Web UI
+├── config/                 # 配置文件
+├── data/                   # 数据目录
+└── tests/                  # 测试
 ```
 
 ## License

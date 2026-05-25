@@ -18,7 +18,7 @@ class LocalEmbedder:
             from sentence_transformers import SentenceTransformer
             print(f"  Loading local embedding model: {self.model_name}...")
             self._model = SentenceTransformer(self.model_name)
-            print(f"  Model loaded. Dimension: {self._model.get_embedding_dimension()}")
+            print(f"  Model loaded. Dimension: {self._model.get_sentence_embedding_dimension()}")
 
     def embed(self, text: str) -> list[float]:
         self._load_model()
@@ -32,4 +32,4 @@ class LocalEmbedder:
     @property
     def dimension(self) -> int:
         self._load_model()
-        return self._model.get_embedding_dimension()
+        return self._model.get_sentence_embedding_dimension()
