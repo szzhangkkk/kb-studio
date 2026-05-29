@@ -17,6 +17,12 @@ embedding:
   model: BAAI/bge-small-zh-v1.5
   # 首次运行会自动从 HuggingFace 下载模型（约 400MB）
   # 国内用户建议: export HF_ENDPOINT=https://hf-mirror.com
+  #
+  # API 模式（使用远程 embedding 服务）：
+  # provider: api
+  # model: BAAI/bge-small-zh-v1.5
+  # api_key: "your-api-key"
+  # base_url: https://api.siliconflow.cn/v1   # 默认使用 SiliconFlow
 
 # 可选配置（以下使用默认值，一般无需修改）：
 #

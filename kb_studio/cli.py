@@ -15,6 +15,8 @@ def main():
 @click.option("--port", default=8000, help="Server port")
 def serve(port):
     """Start the KB-Studio server."""
+    import os
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
     import uvicorn
     uvicorn.run("kb_studio.server:app", host="0.0.0.0", port=port)
 
@@ -68,3 +70,50 @@ def _load_config(path: str) -> dict:
         with open(path) as f:
             return yaml.safe_load(f) or {}
     return {}
+
+
+@main.command()
+@click.option("--transport", default="sse", type=click.Choice(["stdio", "sse"]),
+              help="Transport mode: sse (HTTP) or stdio (for Claude Desktop local)")
+@click.option("--port", default=8001, help="Port for SSE transport")
+def mcp(transport, port):
+    """Start the MCP server for external AI tool integration."""
+    from kb_studio.tools.registry import ToolRegistry
+    from kb_studio.tools.builtin import register_builtin_tools
+    from kb_studio.tools.storage import ToolStorage
+    from kb_studio.tools.loader import ToolLoader
+    from kb_studio.kb_manager import KBManager
+    from kb_studio.core.llm.client import LLMClient
+
+    # Set up registry
+    registry = ToolRegistry()
+    mgr = KBManager()
+
+    def _get_engine(name):
+        return None  # MCP mode doesn't need full engine
+
+    register_builtin_tools(registry, get_manager=lambda: mgr, get_engine=_get_engine, get_engines=lambda: {})
+
+    # Load custom tools
+    storage = ToolStorage()
+    loader = ToolLoader()
+    registry.load_from_storage(storage, loader)
+
+    # Create MCP server
+    from kb_studio.mcp.server import KBStudioMCPServer
+    cfg = _load_config("")
+    llm = LLMClient(cfg.get("llm", {})) if cfg.get("llm", {}).get("api_key") else None
+    mcp_server = KBStudioMCPServer(registry, get_llm=lambda: llm, get_manager=lambda: mgr)
+
+    click.echo(f"KB-Studio MCP Server")
+    click.echo(f"  Transport: {transport}")
+    click.echo(f"  Tools: {len(registry)}")
+    for t in registry.list_tools():
+        click.echo(f"    - {t.name} [{t.source}]")
+
+    if transport == "stdio":
+        from kb_studio.mcp.transport import run_stdio_server
+        run_stdio_server(mcp_server)
+    else:
+        from kb_studio.mcp.transport import run_sse_server
+        run_sse_server(mcp_server, port=port)

@@ -5,7 +5,12 @@ __pycache__/
 # dist/
 build/
 config/active.yaml
+config/*.yaml
+!config/active.example.yaml
 data/
 .mypy_cache/
 .pytest_cache/
 node_modules/
+web/frontend/dist/
+web/frontend/frontend/
+web/frontend/.next/

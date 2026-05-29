@@ -1,0 +1,32 @@
+services:
+  kb-studio:
+    build:
+      context: .
+      target: slim            # Change to "full" for local embedding + Claude support
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data              # Knowledge base data (documents, chunks, conversations)
+      - ./config:/app/config          # LLM/embedding configuration (active.yaml)
+    environment:
+      - KB_STUDIO_API_KEY=${KB_STUDIO_API_KEY:-}          # Optional: set to enable API key auth
+      - KB_STUDIO_CORS_ORIGINS=${KB_STUDIO_CORS_ORIGINS:-*}  # Optional: restrict CORS origins
+    restart: unless-stopped
+
+# ── To use local embedding (sentence-transformers), uncomment below: ──
+#
+# services:
+#   kb-studio:
+#     build:
+#       context: .
+#       target: full
+#     volumes:
+#       - ./data:/app/data
+#       - ./config:/app/config
+#       - hf-cache:/root/.cache/huggingface   # Cache downloaded models
+#     environment:
+#       - HF_ENDPOINT=https://hf-mirror.com   # China HuggingFace mirror (optional)
+#       - KB_STUDIO_API_KEY=${KB_STUDIO_API_KEY:-}
+#
+# volumes:
+#   hf-cache:
