@@ -1,7 +1,7 @@
 # KB-Studio
 
 <p align="center">
-  <strong>自部署的知识库问答平台 | Self-deployable Knowledge Base Q&A Platform</strong>
+  <strong>主动式知识管家 | Proactive Knowledge Butler</strong>
 </p>
 
 <p align="center">
@@ -18,21 +18,46 @@
 
 ### 简介
 
-KB-Studio 是一个开箱即用的 RAG 知识库问答平台。上传文档，配置 LLM，即可获得一个基于你私有数据的智能问答服务。
+KB-Studio 不只是一个 RAG 问答工具——它是一个**主动式知识管家**。上传文档后，管家会自动巡检知识库质量、监控外部数据源变化、从对话中学习你的偏好，并主动推送建议。
 
-### 功能特性
+### 核心特性
 
-- **知识库管理** — 创建多个知识库，独立管理文档和配置
-- **多格式文档支持** — PDF、Word、Excel、PPT、Markdown、HTML、代码文件等 40+ 种格式
-- **URL 导入** — 直接导入网页、YouTube 字幕、Wikipedia 文章
-- **智能分块** — 三种分块策略：按标题、语义感知、滑动窗口
-- **混合检索** — 向量相似度 + BM25 关键词检索，可调权重
-- **多轮对话** — 带上下文的连续问答，对话管理（创建/切换/删除/导出）
-- **记忆系统** — 自动从对话中提取关键信息，注入后续问答
-- **Agent Pipeline** — 多步推理流水线：检索 → 分析 → 生成 → 审核
-- **多 LLM 支持** — DeepSeek、Qwen、智谱、Moonshot、Claude、OpenAI、Ollama 及任意 OpenAI 兼容 API
-- **Web UI** — 内置 Cyberpunk 风格的现代化 Web 界面
-- **API Key 认证** — 可选的 Bearer Token 认证保护
+**知识管理**
+- 多知识库管理，独立配置和检索
+- 40+ 种文档格式支持（PDF、Word、Excel、PPT、Markdown、代码等）
+- URL 导入（网页、YouTube、Wikipedia）
+- 智能分块：按标题、语义感知、滑动窗口
+- 混合检索：向量相似度 + BM25 关键词，可调权重
+- 知识质量分析：自动检测矛盾、重复、过时内容
+
+**管家能力**
+- **定时任务引擎** — 自动巡检、源监控、摘要生成、记忆同步、建议生成
+- **源监控** — 配置 URL 监控列表，内容变化时自动抓取并更新知识库
+- **主动建议** — 基于记忆、文档新鲜度、使用模式生成建议
+- **通知系统** — 应用内通知 + WebSocket 实时推送
+- **内容新鲜度** — 自动标记老化（>7天）和过期（>30天）文档
+
+**记忆与学习**
+- 跨 KB 统一记忆，构建全局用户画像
+- 对话自动提取关键信息（偏好、结论、领域知识）
+- 兴趣识别：从对话中学习用户关注领域
+
+**工具与集成**
+- 自定义工具 / AI 生成工具（自然语言描述 → Python 代码）
+- MCP 协议支持，连接 Claude Desktop、Cursor 等外部 AI
+- 9 个管家 MCP 工具（状态查询、任务触发、建议查看等）
+- Agent Pipeline：多步推理流水线
+
+**导入导出**
+- 知识库一键导出（ZIP 包含文档、配置、记忆、对话）
+- ZIP 导入恢复
+- Markdown 全文导出、质量报告导出
+
+**界面**
+- 赛博朋克风格 Web UI（Next.js）
+- Dark / Light 主题切换
+- VS Code 风格布局（活动栏 + 侧边栏 + 面板）
+- 管家面板：总览、定时任务、源监控、通知、导出
 
 ### 快速开始
 
@@ -41,21 +66,8 @@ KB-Studio 是一个开箱即用的 RAG 知识库问答平台。上传文档，�
 ```bash
 git clone https://github.com/szzhangkkk/kb-studio.git
 cd kb-studio
-
-# 一键启动
 docker compose up -d
-
 # 访问 http://localhost:8000
-```
-
-首次启动后，在 Web 界面的"配置"页面填写你的 LLM API Key 即可使用。
-
-**启用本地 Embedding（可选）：**
-
-本地 Embedding 使用 sentence-transformers，无需 Embedding API，但镜像较大（~2GB）。编辑 `docker-compose.yml`，将 `target: slim` 改为 `target: full`，取消 `hf-cache` 相关注释，然后：
-
-```bash
-docker compose up -d --build
 ```
 
 #### pip 安装
@@ -63,119 +75,64 @@ docker compose up -d --build
 ```bash
 git clone https://github.com/szzhangkkk/kb-studio.git
 cd kb-studio
-
 python -m venv .venv && source .venv/bin/activate
-
-# 基础安装
-pip install -e .
-
-# 完整安装（含本地 Embedding + Claude 支持）
 pip install -e ".[all]"
-
-# 配置
 cp config/active.example.yaml config/active.yaml
-# 编辑 config/active.yaml 填入你的 LLM API Key
-
-# 启动
+# 编辑 config/active.yaml 填入 LLM API Key
 kb-studio serve
 # 访问 http://localhost:8000
 ```
 
 ### 配置
 
-编辑 `config/active.yaml` 或在 Web 界面配置：
-
 ```yaml
 llm:
-  provider: deepseek          # deepseek / qwen / zhipu / moonshot / claude / openai / ollama / custom
-  base_url: https://api.deepseek.com/v1
+  provider: deepseek          # deepseek / qwen / zhipu / claude / openai / ollama / custom
   api_key: "your-api-key"
   model: deepseek-chat
-  temperature: 0.7
-  max_tokens: 4096
 
 embedding:
-  provider: local              # "local"（本地模型）或 "api"（远程 API）
+  provider: local              # "local"（本地）或 "api"（远程）
   model: BAAI/bge-small-zh-v1.5
 ```
 
-**支持的 LLM 提供商：** DeepSeek、通义千问、智谱 GLM、Moonshot、Claude、OpenAI、Ollama 及任意 OpenAI 兼容 API。
-
 #### 环境变量
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `KB_STUDIO_API_KEY` | 空（不启用） | 设置后所有 API 需要 `Authorization: Bearer <key>` |
-| `KB_STUDIO_CORS_ORIGINS` | `*` | 允许的 CORS 来源，逗号分隔 |
-| `HF_ENDPOINT` | 空 | HuggingFace 镜像地址，国内建议设为 `https://hf-mirror.com` |
+| 变量 | 说明 |
+|------|------|
+| `KB_STUDIO_API_KEY` | 设置后 API 需要 Bearer Token 认证 |
+| `KB_STUDIO_CORS_ORIGINS` | CORS 来源（默认 `*`） |
+| `HF_ENDPOINT` | HuggingFace 镜像，国内建议 `https://hf-mirror.com` |
 
 ### 架构
 
 ```
 用户 → Web UI (Next.js) → FastAPI Server
-                              ├── 文档处理（markitdown → 分块）
+                              ├── 文档处理 → 分块 → 向量化
                               ├── 混合检索（向量 + BM25）
                               ├── Chat Engine（RAG 问答）
-                              ├── Agent Pipeline（多步推理）
-                              └── LLM Client（多 Provider 适配）
+                              ├── Agent（工具调用 + Pipeline）
+                              ├── 管家引擎
+                              │   ├── 定时任务调度器
+                              │   ├── 源监控（URL 变更检测）
+                              │   ├── 知识质量分析
+                              │   ├── 主动建议生成
+                              │   ├── 全局记忆系统
+                              │   └── WebSocket 通知推送
+                              ├── 工具系统（自定义 + AI 生成 + MCP）
+                              └── 导入导出
 
-存储：文件系统（./data/{kb_name}/），无需数据库
+存储：文件系统（./data/），无需数据库
 ```
-
-### 支持的文件格式
-
-| 类别 | 格式 |
-|------|------|
-| 文档 | PDF, DOCX, PPTX, XLSX, EPUB, MSG |
-| 表格 | CSV, TSV |
-| 标记语言 | HTML, XML, JSON, RSS, Atom |
-| 文本/代码 | TXT, MD, RST, YAML, TOML, Python, JS, Go, Rust, SQL 等 |
-| 笔记本 | Jupyter Notebook (.ipynb) |
-| 媒体 | JPG, PNG, WAV, MP3, MP4（需配合多模态 LLM） |
-| 压缩包 | ZIP（递归解析） |
-| URL | 网页、YouTube、Wikipedia |
 
 ### CLI 命令
 
 | 命令 | 说明 |
 |------|------|
-| `kb-studio serve` | 启动 Web 服务 |
+| `kb-studio serve` | 启动服务 |
 | `kb-studio create-kb <name>` | 创建知识库 |
-| `kb-studio list-kb` | 列出所有知识库 |
-| `kb-studio test-connection` | 测试 LLM 连接 |
-
-### 开发指南
-
-```bash
-pip install -e ".[all]"
-pip install pytest
-
-pytest                        # 运行测试
-kb-studio serve --port 8000   # 启动开发服务器
-```
-
-### 项目结构
-
-```
-kb-studio/
-├── kb_studio/
-│   ├── cli.py              # CLI 命令
-│   ├── server.py           # FastAPI 服务器
-│   ├── kb_manager.py       # 知识库管理
-│   ├── chat_engine.py      # RAG 对话引擎
-│   ├── agent_pipeline.py   # Agent Pipeline
-│   └── core/
-│       ├── llm/            # LLM 客户端
-│       ├── retrieval/      # 检索策略
-│       ├── vector_store/   # 向量存储
-│       └── doc_processor/  # 文档处理
-├── web/frontend/           # Next.js Web UI
-├── config/                 # 配置文件
-├── data/                   # 数据目录（运行时生成）
-├── tests/                  # 测试
-├── Dockerfile              # Docker 构建文件
-└── docker-compose.yml      # Docker Compose 配置
-```
+| `kb-studio list-kb` | 列出知识库 |
+| `kb-studio test-connection` | 测试连接 |
 
 ---
 
@@ -183,21 +140,46 @@ kb-studio/
 
 ### Overview
 
-KB-Studio is a ready-to-use RAG (Retrieval-Augmented Generation) knowledge base Q&A platform. Upload documents, configure your LLM, and get an intelligent Q&A service powered by your private data.
+KB-Studio is not just a RAG Q&A tool — it's a **proactive knowledge butler**. After uploading documents, the butler automatically audits knowledge quality, monitors external sources for changes, learns your preferences from conversations, and proactively pushes suggestions.
 
-### Features
+### Core Features
 
-- **Knowledge Base Management** — Create multiple knowledge bases with independent documents and configs
-- **Multi-format Support** — PDF, Word, Excel, PPT, Markdown, HTML, source code, and 40+ formats
-- **URL Import** — Import web pages, YouTube transcripts, and Wikipedia articles directly
-- **Smart Chunking** — Three strategies: heading-based, semantic-aware, sliding window
-- **Hybrid Retrieval** — Vector similarity + BM25 keyword search with adjustable weights
-- **Multi-turn Conversations** — Contextual Q&A with conversation management (create/switch/delete/export)
-- **Memory System** — Auto-extract key information from conversations, inject into future Q&A
-- **Agent Pipeline** — Multi-step reasoning: retrieve → analyze → generate → review
-- **Multi-LLM Support** — DeepSeek, Qwen, Zhipu, Moonshot, Claude, OpenAI, Ollama, and any OpenAI-compatible API
-- **Web UI** — Built-in cyberpunk-themed modern web interface
-- **API Key Auth** — Optional Bearer Token authentication
+**Knowledge Management**
+- Multi-KB management with independent configs
+- 40+ document formats (PDF, Word, Excel, PPT, Markdown, code, etc.)
+- URL import (web pages, YouTube, Wikipedia)
+- Smart chunking: heading-based, semantic-aware, sliding window
+- Hybrid retrieval: vector similarity + BM25 keyword search
+- Quality analysis: auto-detect contradictions, duplicates, staleness
+
+**Butler Capabilities**
+- **Scheduled Tasks** — Auto-patrol, source monitoring, digest, memory sync, suggestions
+- **Source Monitoring** — Watch URLs for changes, auto-fetch and update KB
+- **Proactive Suggestions** — Based on memory, freshness, usage patterns
+- **Notifications** — In-app + WebSocket real-time push
+- **Content Freshness** — Auto-mark aging (>7d) and stale (>30d) documents
+
+**Memory & Learning**
+- Cross-KB unified memory with global user profile
+- Auto-extract key info from conversations (preferences, conclusions, domain knowledge)
+- Interest recognition from conversation patterns
+
+**Tools & Integration**
+- Custom / AI-generated tools (NL description → Python code)
+- MCP protocol for Claude Desktop, Cursor integration
+- 9 butler MCP tools (status, tasks, suggestions, memory, etc.)
+- Agent Pipeline: multi-step reasoning chain
+
+**Import/Export**
+- One-click KB export (ZIP with docs, config, memory, conversations)
+- ZIP import to restore
+- Markdown full-text export, quality report export
+
+**Interface**
+- Cyberpunk-themed Web UI (Next.js)
+- Dark / Light theme toggle
+- VS Code-style layout (activity bar + sidebar + panels)
+- Butler panel: overview, tasks, sources, notifications, export
 
 ### Quick Start
 
@@ -206,20 +188,8 @@ KB-Studio is a ready-to-use RAG (Retrieval-Augmented Generation) knowledge base 
 ```bash
 git clone https://github.com/szzhangkkk/kb-studio.git
 cd kb-studio
-
 docker compose up -d
-
 # Visit http://localhost:8000
-```
-
-After first launch, configure your LLM API Key in the Settings page of the web UI.
-
-**Enable Local Embedding (Optional):**
-
-Edit `docker-compose.yml`, change `target: slim` to `target: full`, uncomment `hf-cache` volume, then:
-
-```bash
-docker compose up -d --build
 ```
 
 #### pip Install
@@ -227,95 +197,14 @@ docker compose up -d --build
 ```bash
 git clone https://github.com/szzhangkkk/kb-studio.git
 cd kb-studio
-
 python -m venv .venv && source .venv/bin/activate
-
-# Basic install
-pip install -e .
-
-# Full install (local embedding + Claude support)
 pip install -e ".[all]"
-
-# Configure
 cp config/active.example.yaml config/active.yaml
 # Edit config/active.yaml with your LLM API key
-
-# Start
 kb-studio serve
 # Visit http://localhost:8000
 ```
 
-### Configuration
-
-Edit `config/active.yaml` or configure via the web UI:
-
-```yaml
-llm:
-  provider: deepseek          # deepseek / qwen / zhipu / moonshot / claude / openai / ollama / custom
-  base_url: https://api.deepseek.com/v1
-  api_key: "your-api-key"
-  model: deepseek-chat
-
-embedding:
-  provider: local              # "local" (runs locally) or "api" (remote service)
-  model: BAAI/bge-small-zh-v1.5
-```
-
-**Supported LLM Providers:** DeepSeek, Qwen, Zhipu GLM, Moonshot, Claude, OpenAI, Ollama, and any OpenAI-compatible API.
-
-#### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `KB_STUDIO_API_KEY` | Empty (disabled) | When set, all API requests require `Authorization: Bearer <key>` |
-| `KB_STUDIO_CORS_ORIGINS` | `*` | Comma-separated list of allowed CORS origins |
-| `HF_ENDPOINT` | Empty | HuggingFace mirror URL. Recommended for China: `https://hf-mirror.com` |
-
-### Architecture
-
-```
-User → Web UI (Next.js) → FastAPI Server
-                              ├── Document Processing (markitdown → chunking)
-                              ├── Hybrid Retrieval (vector + BM25)
-                              ├── Chat Engine (RAG Q&A)
-                              ├── Agent Pipeline (multi-step reasoning)
-                              └── LLM Client (multi-provider adapter)
-
-Storage: Filesystem (./data/{kb_name}/) — no database required
-```
-
-### Supported File Formats
-
-| Category | Formats |
-|----------|---------|
-| Documents | PDF, DOCX, PPTX, XLSX, EPUB, MSG |
-| Spreadsheets | CSV, TSV |
-| Markup | HTML, XML, JSON, RSS, Atom |
-| Text/Code | TXT, MD, RST, YAML, TOML, Python, JS, Go, Rust, SQL, etc. |
-| Notebooks | Jupyter Notebook (.ipynb) |
-| Media | JPG, PNG, WAV, MP3, MP4 (requires multimodal LLM) |
-| Archives | ZIP (recursive parsing) |
-| URL | Web pages, YouTube, Wikipedia |
-
-### CLI Commands
-
-| Command | Description |
-|---------|-------------|
-| `kb-studio serve` | Start web server |
-| `kb-studio create-kb <name>` | Create knowledge base |
-| `kb-studio list-kb` | List all knowledge bases |
-| `kb-studio test-connection` | Test LLM connection |
-
-### Development
-
-```bash
-pip install -e ".[all]"
-pip install pytest
-
-pytest                        # Run tests
-kb-studio serve --port 8000   # Start dev server
-```
-
-## License
+### License
 
 MIT
